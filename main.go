@@ -12,6 +12,8 @@ import (
 /* an array with 4 rows and 2 columns*/
 var codebook = [4][2]int{{0b00, 0b01}, {0b01, 0b10}, {0b10, 0b11}, {0b11, 0b00}}
 var iv int = 0b10
+var lookupValue int = 0
+var xor int = 0
 
 func textToBinary(s string) (binString string) {
 	for _, c := range s {
@@ -43,23 +45,9 @@ func codebookLookup(xor int) (lookupValue int) {
 	}
 	return lookupValue
 }
-
-func main() {
-	var text string
-
-	fmt.Printf("Enter your message: ")
-
-	fmt.Scanln(&text)
-
-	fmt.Println("Binary plaintext: " + textToBinary(text))
-	text = textToBinary(text)
-	var i, j int = 0, 0
-	var xor int = 0
-	var lookupValue int = 0
-	var ciphertext string = ""
-	var plaintextBinary string = ""
-
+func OFB_ciphering(text string) (ciphertext string) {
 	// Ciphering
+	var i int = 0
 	for i = 0; i < len(text)-1; i += 2 {
 		lookupValue = codebookLookup(iv)
 		bin, _ := strconv.ParseInt(text[i:i+2], 2, 64)
@@ -69,7 +57,12 @@ func main() {
 		fmt.Printf("The ciphered value is %b\n", xor)
 	}
 	fmt.Println("Ciphertext: " + ciphertext)
+	return ciphertext
+}
 
+func OFB_deciphering(ciphertext string) (plaintext string) {
+	var plaintextBinary string = ""
+	var j int = 0
 	// Deciphering
 	for j = 0; j < len(ciphertext)-1; j += 2 {
 		lookupValue = codebookLookup(iv)
@@ -79,6 +72,18 @@ func main() {
 		plaintextBinary += fmt.Sprintf("%02b", xor)
 		fmt.Printf("The deciphered value is %b\n", xor)
 	}
-	fmt.Printf("The deciphered text is: " + binaryToString(plaintextBinary))
+	plaintext = binaryToString(plaintextBinary)
+	fmt.Printf("The deciphered text is: " + plaintext)
+	return plaintext
 }
 
+func main() {
+	var text string
+	fmt.Printf("Enter your message: ")
+	fmt.Scanln(&text)
+	text = textToBinary(text)
+	fmt.Println("Binary plaintext: " + text)
+
+	ciphertext := OFB_ciphering(text)
+	OFB_deciphering(ciphertext)
+}
